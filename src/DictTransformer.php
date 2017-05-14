@@ -29,9 +29,12 @@ class DictTransformer
     {
         $keys = $this->transformResource($resource, $includes);
 
+        $entities = $this->entities;
+        $this->entities = [];
+
         return [
             'result'   => $keys,
-            'entities' => $this->entities,
+            'entities' => $entities,
         ];
     }
 
