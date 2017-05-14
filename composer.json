@@ -1,0 +1,28 @@
+{
+    "name": "ryan-senn/dict-transformer",
+    "description": "Easy way to transform relational data to a Dictionary",
+    "type": "library",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "ryan senn",
+            "email": "ryan.senn.au@gmail.com"
+        }
+    ],
+    "require": {
+        "php": ">=7.0"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^6.1"
+    },
+    "autoload": {
+        "psr-4": {
+            "DictTransformer\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Test\\": "test/"
+        }
+    }
+}
