@@ -16,19 +16,19 @@ class Collection
     private $transformer;
 
     /**
-     * @param array $entities
+     * @param mixed $entities
      * @param mixed $transformer
      */
-    public function __construct(array $entities, $transformer)
+    public function __construct($entities, $transformer)
     {
         $this->entities = $entities;
         $this->transformer = $transformer;
     }
 
     /**
-     * @return array
+     * @return mixed
      */
-    public function getEntities() : array
+    public function getEntities()
     {
         return $this->entities;
     }
