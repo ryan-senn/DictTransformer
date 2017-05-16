@@ -146,8 +146,10 @@ class DictTransformer
         if (!isset($data[$idField])) {
             throw new InvalidIdException;
         }
-
-        $this->entities[$transformer::KEY][$data[$idField]] = $data;
+        
+        $this->entities[$transformer::KEY][$data[$idField]] = isset($this->entities[$transformer::KEY][$data[$idField]])
+            ? array_merge($this->entities[$transformer::KEY][$data[$idField]], $data)
+            : $data;
 
         return $data[$idField];
     }

@@ -12,6 +12,7 @@ use DictTransformer\Collection;
 use Test\Entities\Tile;
 use Test\Entities\Field;
 use Test\Entities\Settlement;
+use Test\Entities\Settlement2;
 
 use Test\Transformers\TileTransformer;
 use Test\Transformers\FieldTransformer;
@@ -263,6 +264,94 @@ class TransformationTest extends TestCase
                     8        => [
                         'id'   => 8,
                         'name' => 'Melbourne',
+                    ],
+                ],
+            ],
+        ];
+
+        $this->assertEquals($expected, $data);
+    }
+
+    public function testCollectionWithMultipleIncludes()
+    {
+        $settlement1 = new Settlement(4, 'Brisbane');
+        $settlement2 = new Settlement('dsfdsf', 'Sydney');
+        $settlement3 = new Settlement(8, 'Melbourne');
+
+        $settlement10 = new Settlement2(5, 'Brisbane2');
+        $settlement20 = new Settlement2('erttredsfdsf', 'Sydney2');
+        $settlement30 = new Settlement2(99, 'Melbourne2');
+
+        $fields = [
+            new Field(1, 10, $settlement1, $settlement10),
+            new Field('Fjde3', 5, $settlement2, $settlement20),
+            new Field(77, 7, $settlement3, $settlement30),
+        ];
+
+        $tile = new Tile(4, 5, 6, $fields);
+
+        $data = (new DictTransformer)->transform(new Item($tile, new TileTransformer), [
+            'fields.settlement',
+            'fields.settlement2',
+        ]);
+
+        $expected = [
+            'result'   => 4,
+            'entities' => [
+                'tiles'        => [
+                    4 => [
+                        'id'     => 4,
+                        'x'      => 5,
+                        'y'      => 6,
+                        'fields' => [1, 'Fjde3', 77],
+                    ],
+                ],
+                'fields'       => [
+                    1       => [
+                        'id'          => 1,
+                        'level'       => 10,
+                        'settlement'  => 4,
+                        'settlement2' => 5,
+                    ],
+                    'Fjde3' => [
+                        'id'          => 'Fjde3',
+                        'level'       => 5,
+                        'settlement'  => 'dsfdsf',
+                        'settlement2' => 'erttredsfdsf',
+                    ],
+                    77      => [
+                        'id'          => 77,
+                        'level'       => 7,
+                        'settlement'  => 8,
+                        'settlement2' => 99,
+                    ],
+                ],
+                'settlements'  => [
+                    4        => [
+                        'id'   => 4,
+                        'name' => 'Brisbane',
+                    ],
+                    'dsfdsf' => [
+                        'id'   => 'dsfdsf',
+                        'name' => 'Sydney',
+                    ],
+                    8        => [
+                        'id'   => 8,
+                        'name' => 'Melbourne',
+                    ],
+                ],
+                'settlements2' => [
+                    5              => [
+                        'id'   => 5,
+                        'name' => 'Brisbane2',
+                    ],
+                    'erttredsfdsf' => [
+                        'id'   => 'erttredsfdsf',
+                        'name' => 'Sydney2',
+                    ],
+                    99             => [
+                        'id'   => 99,
+                        'name' => 'Melbourne2',
                     ],
                 ],
             ],
