@@ -20,8 +20,8 @@ class DictTransformer
     private $entities = [];
 
     /**
-     * @param Item|Collection $resource
-     * @param array           $includes
+     * @param Item|Collection|NullableItem $resource
+     * @param array                        $includes
      *
      * @return array
      */
@@ -57,6 +57,10 @@ class DictTransformer
 
                 return $this->transformCollection($resource, $includes);
 
+            case $resource instanceof NullableItem:
+
+                return $this->transformNullableItem($resource, $includes);
+
             default:
 
                 throw new InvalidResourceException;
@@ -75,6 +79,16 @@ class DictTransformer
         $transformer = $item->getTransformer();
 
         $key = $this->transformEntity($entity, $transformer, $includes);
+
+        return $key;
+    }
+
+    private function transformNullableItem(NullableItem $item, array $includes = [])
+    {
+        $entity = $item->getEntity();
+        $transformer = $item->getTransformer();
+
+        $key = $key = $this->transformEntity($entity, $transformer, $includes, true);
 
         return $key;
     }
@@ -106,6 +120,7 @@ class DictTransformer
      * @param       $entity
      * @param       $transformer
      * @param array $includes
+     * @param bool  $nullable
      *
      * @return mixed
      * @throws InvalidIdException
@@ -113,7 +128,7 @@ class DictTransformer
      * @throws MissingKeyException
      * @throws MissingTransformException
      */
-    private function transformEntity($entity, $transformer, array $includes = [])
+    private function transformEntity($entity, $transformer, array $includes = [], $nullable = false)
     {
         if (!method_exists($transformer, 'transform')) {
             throw new MissingTransformException;
@@ -121,6 +136,10 @@ class DictTransformer
 
         if (!$this->hasKeyConstant($transformer)) {
             throw new MissingKeyException;
+        }
+
+        if ($nullable && $entity == null) {
+            return null;
         }
 
         $data = $transformer->transform($entity);
@@ -146,7 +165,7 @@ class DictTransformer
         if (!isset($data[$idField])) {
             throw new InvalidIdException;
         }
-        
+
         $this->entities[$transformer::KEY][$data[$idField]] = isset($this->entities[$transformer::KEY][$data[$idField]])
             ? array_merge($this->entities[$transformer::KEY][$data[$idField]], $data)
             : $data;
@@ -182,7 +201,7 @@ class DictTransformer
      *
      * @return string
      */
-    private function getIdField($transformer) : string
+    private function getIdField($transformer): string
     {
         $transformerName = get_class($transformer);
 
