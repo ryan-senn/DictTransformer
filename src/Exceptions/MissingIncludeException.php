@@ -7,5 +7,10 @@ use Exception;
 class MissingIncludeException extends Exception
 {
 
-    protected $message = "Transformer is missing the requested include method.";
+    public function __construct(string $transformer, string $include)
+    {
+        $message = "Transformer is missing the requested include method. Transformer: {$transformer}, Include: {$include}";
+
+        parent::__construct($message);
+    }
 }

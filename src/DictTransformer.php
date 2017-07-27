@@ -152,7 +152,7 @@ class DictTransformer
             $rest = $parsedIncludeString['rest'];
 
             if (!method_exists($transformer, $current)) {
-                throw new MissingIncludeException;
+                throw new MissingIncludeException(get_class($transformer), $current);
             }
 
             $resource = $transformer->{$current}($entity);
