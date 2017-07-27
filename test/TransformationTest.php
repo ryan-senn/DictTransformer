@@ -2,6 +2,7 @@
 
 namespace Test;
 
+use DictTransformer\NullableItem;
 use PHPUnit\Framework\TestCase;
 
 use DictTransformer\DictTransformer;
@@ -352,6 +353,91 @@ class TransformationTest extends TestCase
                     99             => [
                         'id'   => 99,
                         'name' => 'Melbourne2',
+                    ],
+                ],
+            ],
+        ];
+
+        $this->assertEquals($expected, $data);
+    }
+
+    public function testNullableItemNotNull()
+    {
+        $tile = new Tile(1, 1, 2);
+
+        $data = (new DictTransformer)->transform(new NullableItem($tile, new TileTransformer));
+
+        $expected = [
+            'result'   => 1,
+            'entities' => [
+                'tiles' => [
+                    1 => [
+                        'id' => 1,
+                        'x'  => 1,
+                        'y'  => 2,
+                    ],
+                ],
+            ],
+        ];
+
+        $this->assertEquals($expected, $data);
+    }
+
+    public function testNullableItemWithNull()
+    {
+        $data = (new DictTransformer)->transform(new NullableItem(null, new TileTransformer));
+
+        $expected = [
+            'result'   => null,
+            'entities' => [],
+        ];
+
+        $this->assertEquals($expected, $data);
+    }
+
+    public function testIncludeNullableItem()
+    {
+        $settlement = new Settlement(19, 'Brisbane');
+        $field = new Field(1, 10, $settlement);
+
+        $data = (new DictTransformer)->transform(new Item($field, new FieldTransformer), ['nullableSettlement']);
+
+        $expected = [
+            'result'   => 1,
+            'entities' => [
+                'fields'      => [
+                    1 => [
+                        'id'         => 1,
+                        'level'      => 10,
+                        'nullableSettlement' => 19,
+                    ],
+                ],
+                'settlements' => [
+                    19 => [
+                        'id'   => 19,
+                        'name' => 'Brisbane',
+                    ],
+                ],
+            ],
+        ];
+
+        $this->assertEquals($expected, $data);
+    }
+
+    public function testIncludeNullItem()
+    {
+        $field = new Field(1, 10);
+
+        $data = (new DictTransformer)->transform(new Item($field, new FieldTransformer), ['nullableSettlement']);
+
+        $expected = [
+            'result'   => 1,
+            'entities' => [
+                'fields'      => [
+                    1 => [
+                        'id'         => 1,
+                        'level'      => 10,
+                        'nullableSettlement' => null,
                     ],
                 ],
             ],

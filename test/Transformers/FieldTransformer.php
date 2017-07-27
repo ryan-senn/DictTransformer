@@ -2,6 +2,7 @@
 
 namespace Test\Transformers;
 
+use DictTransformer\NullableItem;
 use Test\Entities\Field;
 
 use DictTransformer\Item;
@@ -49,4 +50,12 @@ class FieldTransformer
         $settlement2 = $field->getSettlement2();
 
         return new Item($settlement2, new Settlement2Transformer);
-    }}
+    }
+
+    public function nullableSettlement(Field $field) : NullableItem
+    {
+        $nullableSettlement = $field->getSettlement();
+
+        return new NullableItem($nullableSettlement, new SettlementTransformer);
+    }
+}
