@@ -5,11 +5,10 @@ namespace Test\Transformers\Exceptions;
 /**
  * @package App\Transformers
  */
-class InvalidIdTransformer
+class MissingGetIdTransformer
 {
 
     const KEY = 'fields';
-    const ID = 'missing';
 
     public function transform($data)
     {

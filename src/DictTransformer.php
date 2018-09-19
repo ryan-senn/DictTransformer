@@ -6,7 +6,7 @@ use DictTransformer\Exceptions\InvalidResourceException;
 use DictTransformer\Exceptions\MissingTransformException;
 use DictTransformer\Exceptions\MissingKeyException;
 use DictTransformer\Exceptions\MissingIncludeException;
-use DictTransformer\Exceptions\InvalidIdException;
+use DictTransformer\Exceptions\MissingGetIdException;
 
 /**
  * @package DictTransformer
@@ -24,6 +24,7 @@ class DictTransformer
      * @param array                        $includes
      *
      * @return array
+     * @throws InvalidResourceException
      */
     public function transform($resource, array $includes = [])
     {
@@ -72,6 +73,10 @@ class DictTransformer
      * @param array $includes
      *
      * @return mixed
+     * @throws MissingGetIdException
+     * @throws MissingIncludeException
+     * @throws MissingKeyException
+     * @throws MissingTransformException
      */
     private function transformItem(Item $item, array $includes = [])
     {
@@ -98,6 +103,10 @@ class DictTransformer
      * @param array      $includes
      *
      * @return array
+     * @throws MissingGetIdException
+     * @throws MissingIncludeException
+     * @throws MissingKeyException
+     * @throws MissingTransformException
      */
     private function transformCollection(Collection $collection, array $includes = [])
     {
@@ -123,10 +132,11 @@ class DictTransformer
      * @param bool  $nullable
      *
      * @return mixed
-     * @throws InvalidIdException
      * @throws MissingIncludeException
      * @throws MissingKeyException
      * @throws MissingTransformException
+     * @throws InvalidResourceException
+     * @throws MissingGetIdException
      */
     private function transformEntity($entity, $transformer, array $includes = [], $nullable = false)
     {
@@ -142,7 +152,19 @@ class DictTransformer
             return null;
         }
 
-        $data = $transformer->transform($entity);
+        if (!method_exists($entity, "getId")) {
+            throw new MissingGetIdException();
+        }
+
+        $id = $entity->getId();
+
+        if (isset($this->entities[$transformer::KEY][$id])) {
+            $data = $this->entities[$transformer::KEY][$id];
+        }
+        else {
+            $data = $transformer->transform($entity);
+            $data['id'] = $id;
+        }
 
         foreach ($includes as $include) {
 
@@ -160,17 +182,11 @@ class DictTransformer
             $data[$current] = $this->transformResource($resource, $rest);
         }
 
-        $idField = $this->getIdField($transformer);
-
-        if (!isset($data[$idField])) {
-            throw new InvalidIdException;
-        }
-
-        $this->entities[$transformer::KEY][$data[$idField]] = isset($this->entities[$transformer::KEY][$data[$idField]])
-            ? array_merge($this->entities[$transformer::KEY][$data[$idField]], $data)
+        $this->entities[$transformer::KEY][$id] = isset($this->entities[$transformer::KEY][$id])
+            ? array_merge($this->entities[$transformer::KEY][$id], $data)
             : $data;
 
-        return $data[$idField];
+        return $id;
     }
 
     /**
@@ -199,45 +215,12 @@ class DictTransformer
     /**
      * @param $transformer
      *
-     * @return string
-     */
-    private function getIdField($transformer): string
-    {
-        $transformerName = get_class($transformer);
-
-        return $this->hasIdConstant($transformer) ? $transformerName::ID : 'id';
-    }
-
-    /**
-     * @param $transformer
-     *
-     * @return bool
-     */
-    private function hasIdConstant($transformer)
-    {
-        return $this->hasConstant($transformer, 'ID');
-    }
-
-    /**
-     * @param $transformer
-     *
      * @return bool
      */
     private function hasKeyConstant($transformer)
     {
-        return $this->hasConstant($transformer, 'KEY');
-    }
-
-    /**
-     * @param        $transformer
-     * @param string $constant
-     *
-     * @return bool
-     */
-    private function hasConstant($transformer, string $constant)
-    {
         $transformerName = get_class($transformer);
 
-        return defined("$transformerName::$constant");
+        return defined("$transformerName::KEY");
     }
 }

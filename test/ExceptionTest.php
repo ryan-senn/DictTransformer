@@ -8,12 +8,13 @@ use DictTransformer\DictTransformer;
 
 use DictTransformer\Item;
 
+use Test\Entities\MissingGetIdTile;
 use Test\Entities\Tile;
 
 use Test\Transformers\Exceptions\MissingKeyTransformer;
 use Test\Transformers\Exceptions\MissingIncludeTransformer;
 use Test\Transformers\Exceptions\MissingTransformTransformer;
-use Test\Transformers\Exceptions\InvalidIdTransformer;
+use Test\Transformers\Exceptions\MissingGetIdTransformer;
 
 class ExceptionTest extends TestCase
 {
@@ -49,12 +50,12 @@ class ExceptionTest extends TestCase
     }
 
     /**
-     * @expectedException \DictTransformer\Exceptions\InvalidIdException
+     * @expectedException \DictTransformer\Exceptions\MissingGetIdException
      */
-    public function testInvalidId()
+    public function testMissingGetId()
     {
-        $tile = new Tile(1, 1, 2);
+        $tile = new MissingGetIdTile(1, 2);
 
-        (new DictTransformer)->transform(new Item($tile, new InvalidIdTransformer));
+        (new DictTransformer)->transform(new Item($tile, new MissingGetIdTransformer));
     }
 }
